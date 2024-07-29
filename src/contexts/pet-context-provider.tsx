@@ -8,6 +8,9 @@ type PetContextType = {
   selectedPetId: String | null;
   selectedPet: Pet | undefined;
   noOfPets: number;
+  handleEditPet: (newPet: Pet) => void;
+  handleAddPet: (newPet: Omit<Pet, "id">) => void;
+  handleCheckOutPet: (id: string) => void;
   handleChangeSelectedPetId: (id: string) => void;
 };
 type PetContextProviderProps = {
@@ -27,9 +30,22 @@ export default function PetContextProvider({
   const noOfPets = pets.length;
 
   //event handlers/actions
+  const handleEditPet = (newPet: Pet) => {
+    setPets((pets) => pets.map((pet) => (pet.id === newPet.id ? newPet : pet)));
+  };
+  const handleAddPet = (newPet: Omit<Pet, "id">) => {
+    const pet = { ...newPet, id: Date.now().toString() };
+    setPets((pets) => [...pets, pet]);
+    setSelectedPetId(pet.id);
+  };
+  const handleCheckOutPet = (id: string) => {
+    setPets((pets) => pets.filter((pet) => pet.id !== id));
+    setSelectedPetId(null);
+  };
   const handleChangeSelectedPetId = (id: string) => {
     setSelectedPetId(id);
   };
+
   return (
     <PetContext.Provider
       value={{
@@ -37,6 +53,9 @@ export default function PetContextProvider({
         selectedPetId,
         handleChangeSelectedPetId,
         noOfPets,
+        handleEditPet,
+        handleAddPet,
+        handleCheckOutPet,
         selectedPet,
       }}
     >
