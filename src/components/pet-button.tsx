@@ -5,6 +5,7 @@ import { PlusIcon } from "@radix-ui/react-icons";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -49,6 +50,7 @@ export default function PetButton({
           <DialogTitle>
             {actionType === "add" ? "Add a new pet" : "Edit pet"}
           </DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
         <PetForm
           actionType={actionType}

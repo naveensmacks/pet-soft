@@ -1,6 +1,7 @@
 "use client";
 import { addPet, deletePet, editPet } from "@/actions/actions";
-import { Pet } from "@/lib/types";
+import { PetEssentials } from "@/lib/types";
+import { Pet } from "@prisma/client";
 import { createContext, useOptimistic, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,10 +11,10 @@ type PetContextType = {
   selectedPetId: String | null;
   selectedPet: Pet | undefined;
   noOfPets: number;
-  handleEditPet: (id: string, newPetData: Omit<Pet, "id">) => Promise<void>;
-  handleAddPet: (newPet: Omit<Pet, "id">) => Promise<void>;
-  handleCheckOutPet: (id: string) => Promise<void>;
-  handleChangeSelectedPetId: (id: string) => void;
+  handleEditPet: (id: Pet["id"], newPetData: PetEssentials) => Promise<void>;
+  handleAddPet: (newPet: PetEssentials) => Promise<void>;
+  handleCheckOutPet: (id: Pet["id"]) => Promise<void>;
+  handleChangeSelectedPetId: (id: Pet["id"]) => void;
 };
 type PetContextProviderProps = {
   data: Pet[];
@@ -47,7 +48,7 @@ export default function PetContextProvider({
   const noOfPets = optimisticPets.length;
 
   //event handlers/actions
-  const handleEditPet = async (id: string, newPetData: Omit<Pet, "id">) => {
+  const handleEditPet = async (id: Pet["id"], newPetData: PetEssentials) => {
     setOptimisticPets({ action: "edit", payload: { ...newPetData, id } });
     const error = await editPet(selectedPet?.id as string, newPetData);
     if (error) {
@@ -55,7 +56,7 @@ export default function PetContextProvider({
       return;
     }
   };
-  const handleAddPet = async (newPet: Omit<Pet, "id">) => {
+  const handleAddPet = async (newPet: PetEssentials) => {
     setOptimisticPets({ action: "add", payload: newPet });
     const error = await addPet(newPet);
     if (error) {
@@ -72,7 +73,7 @@ export default function PetContextProvider({
     }
     setSelectedPetId(null);
   };
-  const handleChangeSelectedPetId = async (id: string) => {
+  const handleChangeSelectedPetId = async (id: Pet["id"]) => {
     setSelectedPetId(id);
   };
 

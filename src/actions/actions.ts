@@ -1,10 +1,11 @@
 "use server";
 import prisma from "@/lib/db";
-import { Pet } from "@/lib/types";
+import { PetEssentials } from "@/lib/types";
 import { sleep } from "@/lib/utils";
+import { Pet } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-export async function addPet(pet: Omit<Pet, "id">) {
+export async function addPet(pet: PetEssentials) {
   await sleep(3000);
   try {
     await prisma.pet.create({
@@ -19,7 +20,7 @@ export async function addPet(pet: Omit<Pet, "id">) {
   revalidatePath("/app", "layout");
 }
 
-export async function editPet(petId: string, newPetData: Omit<Pet, "id">) {
+export async function editPet(petId: Pet["id"], newPetData: PetEssentials) {
   await sleep(3000);
   try {
     await prisma.pet.update({

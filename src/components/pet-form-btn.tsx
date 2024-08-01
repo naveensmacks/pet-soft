@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { useFormStatus } from "react-dom";
-import { DialogClose } from "./ui/dialog";
 
 type PetFormBtnProps = {
   actionType: "add" | "edit";
