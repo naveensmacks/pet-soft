@@ -5,11 +5,17 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import PetFormBtn from "./pet-form-btn";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DEFAULT_PET_IMAGE } from "@/lib/constants";
+import { petFormSchema, TPetForm } from "@/lib/validations";
 
 type PetFormProps = {
   actionType: "add" | "edit";
   onFormSubmission: () => void;
 };
+
 export default function PetForm({
   actionType,
   onFormSubmission,
@@ -39,12 +45,32 @@ export default function PetForm({
   };
   */
 
+  const {
+    register,
+    trigger,
+    getValues,
+    formState: { errors },
+  } = useForm<TPetForm>({
+    resolver: zodResolver(petFormSchema),
+    defaultValues: isEditing
+      ? {
+          name: selectedPet?.name,
+          ownerName: selectedPet?.ownerName,
+          imageUrl: selectedPet?.imageUrl,
+          age: selectedPet?.age,
+          notes: selectedPet?.notes,
+        }
+      : {},
+  });
   return (
     <form
-      action={async (formData) => {
+      action={async () => {
+        const result = await trigger();
+        if (!result) return;
+
         onFormSubmission();
 
-        const petData = {
+        /*const petData = {
           name: formData.get("name") as string,
           ownerName: formData.get("ownerName") as string,
           imageUrl:
@@ -52,8 +78,10 @@ export default function PetForm({
             "https://bytegrad.com/course-assets/react-nextjs/pet-placeholder.png",
           age: +(formData.get("age") as string),
           notes: formData.get("notes") as string,
-        };
+        };*/
 
+        const petData = getValues();
+        petData.imageUrl = petData.imageUrl || DEFAULT_PET_IMAGE;
         if (isEditing) {
           await handleEditPet(selectedPet!.id, petData);
         } else {
@@ -67,54 +95,46 @@ export default function PetForm({
           <Label htmlFor="name">Name</Label>
           <Input
             id="name"
+            {...register("name", {
+              required: "Name is required",
+              minLength: {
+                value: 3,
+                message: "Name must be at least 3 characters",
+              },
+            })}
             name="name"
-            type="text"
-            defaultValue={isEditing ? selectedPet?.name : ""}
-            required
           />
+          {errors.name && <p className="text-red-500">{errors.name.message}</p>}
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="ownerName">Owner Name</Label>
-          <Input
-            id="name"
-            name="ownerName"
-            type="text"
-            defaultValue={isEditing ? selectedPet?.ownerName : ""}
-            required
-          />
+          <Input id="ownerName" {...register("ownerName")} name="ownerName" />
+          {errors.ownerName && (
+            <p className="text-red-500">{errors.ownerName.message}</p>
+          )}
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="imageUrl">Image Url</Label>
-          <Input
-            id="imageUrl"
-            name="imageUrl"
-            defaultValue={isEditing ? selectedPet?.imageUrl : ""}
-            type="text"
-          />
+          <Input id="imageUrl" {...register("imageUrl")} name="imageUrl" />
+          {errors.imageUrl && (
+            <p className="text-red-500">{errors.imageUrl.message}</p>
+          )}
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="age">Age</Label>
-          <Input
-            id="age"
-            name="age"
-            type="number"
-            defaultValue={isEditing ? selectedPet?.age : ""}
-            required
-          />
+          <Input id="age" {...register("age")} name="age" />
+          {errors.age && <p className="text-red-500">{errors.age.message}</p>}
         </div>
 
         <div className="space-y-1">
           <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
-            name="notes"
-            rows={3}
-            defaultValue={isEditing ? selectedPet?.notes : ""}
-            required
-          />
+          <Textarea id="notes" {...register("notes")} name="notes" rows={3} />
+          {errors.notes && (
+            <p className="text-red-500">{errors.notes.message}</p>
+          )}
         </div>
       </div>
 
